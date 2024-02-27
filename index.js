@@ -6,6 +6,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(require('morgan')('dev'));
 
+// Parse the body
+app.use(express.json());
+
 //ROUTES    
 
 
@@ -28,14 +31,33 @@ app.get('/api/flavors/:id', async (req,res, next)=> {
 
     try{
         const SQL = `
-            SELECT * FROM flavors WHERE id = ${id};
+            SELECT * FROM flavors WHERE id = $1;
         `
-        const response = await client.query(SQL);
+        const response = await client.query(SQL, [id]);
         res.send(response.rows);
     } catch(err) {
         next(err)
     }
-})
+});
+
+//Create Flavor
+app.post('/api/flavors', async (req, res, next) => {
+  try {
+    const name = req.body.name;
+    const isFavorite = req.body.isFavorite || false;
+
+    const SQL = `
+      INSERT INTO flavors(name, is_favorite) VALUES($1, $2)
+      RETURNING *
+    `;
+
+    const response = await client.query(SQL, [name, isFavorite]);
+
+    res.send(response.rows);  
+  } catch (err) {
+    next(err); 
+  }
+});
 
 
 const init = async () => {
