@@ -71,7 +71,28 @@ app.delete('/api/flavors/:id', async (req,res,send) => {
         next(err);
     }
 })
-
+// Update route
+app.put('/api/flavors/:id', async (req, res, next) => {
+    try {
+        const {id} = req.params;
+        const {name} = req.body;
+        const isFavorite = req.body?.isFavorite ?? false;
+        const SQL = `
+            UPDATE flavors
+            SET name = $1, is_favorite = $2, updated_at=now() WHERE id = $3
+        
+            RETURNING *
+        `;
+        const response = await client.query(SQL, [name, isFavorite, id]);
+        if (response.rowCount === 1) {
+            res.send(response.rows[0]); // Send the updated flavor data
+        } else {
+            res.status(404).send('Flavor not found'); // Handle non-existent flavor
+        }
+    } catch (err) {
+        next(err); // Pass error to error handler middleware
+    }
+});
 const init = async () => {
     await client.connect();
      let SQL = `
