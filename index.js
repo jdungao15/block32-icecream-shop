@@ -59,6 +59,18 @@ app.post('/api/flavors', async (req, res, next) => {
   }
 });
 
+//DELETE
+app.delete('/api/flavors/:id', async (req,res,send) => {
+    try {
+        const SQL = `
+            DELETE FROM flavors WHERE id = $1;
+        `
+        await client.query(SQL,[req.params.id]);
+        res.sendStatus(204);
+    }catch(err) {
+        next(err);
+    }
+})
 
 const init = async () => {
     await client.connect();
