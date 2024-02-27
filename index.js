@@ -9,7 +9,7 @@ app.use(require('morgan')('dev'));
 //ROUTES    
 
 
-//GET
+//GET ALL THE FLAVORS
 app.get('/api/flavors', async (req,res,next)=> {
     try {
         const SQL = `
@@ -19,6 +19,21 @@ app.get('/api/flavors', async (req,res,next)=> {
         res.send(response.rows)
     } catch(err) {
         next(err);
+    }
+});
+
+// RETURN SINGLE flavors
+app.get('/api/flavors/:id', async (req,res, next)=> {
+    const id = req.params.id;
+
+    try{
+        const SQL = `
+            SELECT * FROM flavors WHERE id = ${id};
+        `
+        const response = await client.query(SQL);
+        res.send(response.rows);
+    } catch(err) {
+        next(err)
     }
 })
 
